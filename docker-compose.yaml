@@ -1,0 +1,51 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.4
+    container_name: unomi-es
+    environment:
+      - cluster.name=unomi-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./esdata:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - unomi-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  unomi:
+    image: arm64v8/openjdk:17-jdk
+    container_name: unomi
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    working_dir: /opt/unomi
+    volumes:
+      - /home/mb/Documentos/unomi/unomi/package/target/assembly:/opt/unomi
+    environment:
+      - JAVA_HOME=/usr/java/openjdk-17
+      - JAVA_OPTS=-Xms1024m -Xmx2048m
+      - UNOMI_ES_HOSTS=http://elasticsearch:9200
+      - UNOMI_HTTP_PORT=8181
+      - UNOMI_HOME=/opt/unomi/data
+    command: ["sh", "-c", "rm -f /opt/unomi/lock && /opt/unomi/bin/karaf run"]
+    ports:
+      - 8181:8181
+    networks:
+      - unomi-net
+
+networks:
+  unomi-net:
+    driver: bridge

@@ -32,7 +32,8 @@
         <bundle start="false">mvn:org.reactivestreams/reactive-streams/${reactive-stream.version}</bundle>
         <bundle start="false">mvn:com.graphql-java/graphql-java/${graphql.java.version}</bundle>
         <bundle start="false">mvn:io.github.graphql-java/graphql-java-annotations/${graphql.java.annotations.version}</bundle>
-        <bundle start="false">mvn:javax.validation/validation-api/${javax-validation.version}</bundle>
+        <!-- See kar/src/main/feature/feature.xml for rationale -->
+        <bundle start="false">mvn:jakarta.validation/jakarta.validation-api/2.0.2</bundle>
         <bundle start="false">wrap:mvn:com.graphql-java/graphql-java-extended-scalars/${graphql.java.extended.scalars.version}</bundle>
         <bundle start="false">wrap:mvn:com.squareup.okhttp3/okhttp/${okhttp.version}</bundle>
         <bundle start="false">wrap:mvn:com.squareup.okio/okio/${okio.version}</bundle>

@@ -46,7 +46,10 @@
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpcore-osgi.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient-osgi.version}</bundle>
-        <bundle>mvn:javax.validation/validation-api/${javax-validation.version}</bundle>
+        <!-- jakarta.validation-api 2.0.2 replaces javax.validation:validation-api:1.1.0.Final.
+             Using a single validation provider prevents an OSGi classloader split that caused
+             a ClassCastException in Swagger's ModelResolver when generating openapi.json. -->
+        <bundle>mvn:jakarta.validation/jakarta.validation-api/2.0.2</bundle>
         <!-- Jackson bundles not included in any karaf feature -->
         <bundle>mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>

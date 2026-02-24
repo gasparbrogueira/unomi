@@ -239,7 +239,35 @@ public class RestServer {
         openApiFeature.setUseContextBasedConfig(true);
         SwaggerUiConfig swaggerUiConfig = new SwaggerUiConfig().url("openapi.json").deepLinking(true).queryConfigEnabled(false);
         openApiFeature.setSwaggerUiConfig(swaggerUiConfig);
-        OpenApiCustomizer customizer = new OpenApiCustomizer();
+        // Use a custom OpenApiCustomizer that pins the Thread Context ClassLoader (TCCL) to
+        // this bundle's classloader before Swagger processes JAX-RS annotations.
+        // Without this, javax.validation.constraints.* annotations cross OSGi bundle boundaries
+        // and the JDK creates proxies under a different classloader than the one Swagger expects,
+        // resulting in a ClassCastException and an HTTP 500 on /cxs/openapi.json.
+        final ClassLoader bundleClassLoader = RestServer.class.getClassLoader();
+        OpenApiCustomizer customizer = new OpenApiCustomizer() {
+            @Override
+            public void customize(io.swagger.v3.oas.models.OpenAPI openAPI) {
+                ClassLoader orig = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(bundleClassLoader);
+                try {
+                    super.customize(openAPI);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(orig);
+                }
+            }
+
+            @Override
+            public io.swagger.v3.oas.integration.api.OpenAPIConfiguration customize(io.swagger.v3.oas.integration.api.OpenAPIConfiguration configuration) {
+                ClassLoader orig = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(bundleClassLoader);
+                try {
+                    return super.customize(configuration);
+                } finally {
+                    Thread.currentThread().setContextClassLoader(orig);
+                }
+            }
+        };
         customizer.setDynamicBasePath(true);
         openApiFeature.setCustomizer(customizer);
         jaxrsServerFactoryBean.getFeatures().add(openApiFeature);
