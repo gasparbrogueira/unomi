@@ -25,6 +25,7 @@ import org.apache.unomi.api.query.Query;
 import org.apache.unomi.api.segments.DependentMetadata;
 import org.apache.unomi.api.segments.Segment;
 import org.apache.unomi.api.services.SegmentService;
+import org.apache.unomi.rest.exception.InvalidRequestException;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -143,6 +144,15 @@ public class SegmentServiceEndPoint {
     @POST
     @Path("/")
     public void setSegmentDefinition(Segment segment) {
+        if (segment == null) {
+            throw new InvalidRequestException("Cannot persist a null segment", "Segment body is required");
+        }
+        if (segment.getMetadata() == null) {
+            throw new InvalidRequestException(
+                    "Cannot persist segment " + segment.getItemId() + " with null metadata",
+                    "Segment metadata is required"
+            );
+        }
         segmentService.setSegmentDefinition(segment);
     }
 

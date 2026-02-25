@@ -1719,8 +1719,14 @@ public class ElasticSearchPersistenceServiceImpl implements PersistenceService, 
     @Override public boolean isValidCondition(Condition condition, Item item) {
         try {
             conditionEvaluatorDispatcher.eval(condition, item);
+            Query filterQuery = conditionESQueryBuilderDispatcher.buildFilter(condition);
+            if (filterQuery == null) {
+                LOGGER.error("Failed to validate condition: query builder returned null. See debug log level for more information");
+                LOGGER.debug("Failed to validate condition (null query), condition={}", condition);
+                return false;
+            }
             Query.of(q -> q.bool(builder -> builder.must(mustBuilder -> mustBuilder.ids(IdsQuery.of(ids -> ids.values(item.getItemId()))))
-                    .must(conditionESQueryBuilderDispatcher.buildFilter(condition))));
+                    .must(filterQuery)));
         } catch (Exception e) {
             LOGGER.error("Failed to validate condition. See debug log level for more information");
             LOGGER.debug("Failed to validate condition, condition={}", condition, e);

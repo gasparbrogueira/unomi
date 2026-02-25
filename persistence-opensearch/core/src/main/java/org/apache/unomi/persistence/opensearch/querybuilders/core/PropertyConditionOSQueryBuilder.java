@@ -170,8 +170,11 @@ public class PropertyConditionOSQueryBuilder implements ConditionOSQueryBuilder 
 
                     return Query.of(q->q.geoDistance(g->g.field(name).distance(distance + "").distanceType(unit).location(l->l.text(centerString))));
                 }
+                throw new IllegalArgumentException(
+                        "Impossible to build OS filter, missing center or distance for comparisonOperator: distance, propertyName: " + name);
         }
-        return null;
+        throw new UnsupportedOperationException(
+                "Unsupported comparisonOperator '" + comparisonOperator + "' for property condition");
     }
 
     private void checkRequiredValuesSize(Collection<?> values, String name, String operator, int expectedSize) {

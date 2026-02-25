@@ -1691,10 +1691,16 @@ public class OpenSearchPersistenceServiceImpl implements PersistenceService, Syn
     public boolean isValidCondition(Condition condition, Item item) {
         try {
             conditionEvaluatorDispatcher.eval(condition, item);
+            Query filterQuery = conditionOSQueryBuilderDispatcher.buildFilter(condition);
+            if (filterQuery == null) {
+                LOGGER.error("Failed to validate condition: query builder returned null. See debug log level for more information");
+                LOGGER.debug("Failed to validate condition (null query), condition={}", condition);
+                return false;
+            }
             Query.of(q -> q
                     .bool(b -> b
                             .must(m -> m.ids(i -> i.values(item.getItemId())))
-                            .must(conditionOSQueryBuilderDispatcher.buildFilter(condition))));
+                            .must(filterQuery)));
         } catch (Exception e) {
             LOGGER.error("Failed to validate condition. See debug log level for more information");
             if (LOGGER.isDebugEnabled()) {

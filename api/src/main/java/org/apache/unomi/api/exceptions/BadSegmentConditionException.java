@@ -21,4 +21,12 @@ public class BadSegmentConditionException extends RuntimeException {
     public BadSegmentConditionException() {
         super();
     }
+
+    public BadSegmentConditionException(String message) {
+        super(message);
+    }
+
+    public BadSegmentConditionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

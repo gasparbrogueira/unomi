@@ -45,7 +45,11 @@ public class BooleanConditionOSQueryBuilder implements ConditionOSQueryBuilder {
         int conditionCount = conditions.size();
 
         if (conditionCount == 1) {
-            return dispatcher.buildFilter(conditions.get(0), context);
+            Query singleFilter = dispatcher.buildFilter(conditions.get(0), context);
+            if (singleFilter == null) {
+                LOGGER.warn("Null filter for single boolean sub condition {}", conditions.get(0));
+            }
+            return singleFilter;
         }
 
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();

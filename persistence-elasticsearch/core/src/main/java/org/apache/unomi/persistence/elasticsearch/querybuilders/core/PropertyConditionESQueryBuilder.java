@@ -83,7 +83,8 @@ public class PropertyConditionESQueryBuilder implements ConditionESQueryBuilder 
             return buildDistanceQuery(condition, propertyName);
         }
 
-        return null;
+        throw new UnsupportedOperationException(
+                "Unsupported comparisonOperator '" + comparisonOperator + "' for property condition");
     }
 
     /**
